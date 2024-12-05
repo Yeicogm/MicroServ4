@@ -16,7 +16,7 @@ const User = mongoose.model('User', userSchema);
 const exerciseSchema = new Schema({
 	description: { type: String, required: true },
 	duration: { type: Number, required: true },
-	date: String
+	date: { type: String, required: true }
 });
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 
@@ -53,7 +53,14 @@ app.get('/api/users', (req, res) => {
 	})
 })
 
-
+function checkValidDate(dateString) {
+	// Intenta crear una nueva fecha con la cadena proporcionada
+	const date = new Date(dateString);
+	
+	// Verifica que la fecha sea válida
+	return date instanceof Date && !isNaN(date);
+  }
+  
 
 app.post('/api/users/:_id/exercises', async (req, res) => {
 	try { 
