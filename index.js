@@ -97,6 +97,37 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 	} 
 });
 
+app.get('/api/users/:_id/logs/:from?/:to?/:limit?', async (req, res) => {
+	try {
+	  const user = await User.findById(req.params._id);
+	  if (!user) {
+		return res.status(404).json({ error: "User not found" });
+	  }
+  
+	  let exercises = [];
+	  if (req.query.from || req.query.to || req.query.limit) {
+		let from = req.query.from ? new Date(req.query.from) : new Date(-8640000000000000); // Mínima fecha posible
+		let to = req.query.to ? new Date(req.query.to) : new Date();
+		let limit = req.query.limit ? parseInt(req.query.limit) : Infinity;
+  
+		for (let i = 0; i < user.log.length; i++) {
+		  if (exercises.length === limit) break;
+		  
+		  let userDate = new Date(user.log[i].date);
+		  if (userDate >= from && userDate <= to) {
+			exercises.push(user.log[i]);
+		  }
+		}
+		res.json({ _id: user._id, username: user.username, count: exercises.length, log: exercises });
+	  } else {
+		res.json({ _id: user._id, username: user.username, count: user.log.length, log: user.log });
+	  }
+	} catch (err) {
+	  res.status(500).json({ error: "Sorry, we couldn't save this exercise log to the database" });
+	}
+  });
+  
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
